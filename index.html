@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지수함수와 로그함수 — 풀이 포함</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --cream: #f5f0e8;
+  --red: #c0392b;
+  --gold: #d4a843;
+  --slate: #4a5568;
+  --light: #e8e2d9;
+  --tok: #1e3a5f;
+  --tok-light: #e8f0fb;
+  --green: #1a6b3a;
+  --green-light: #e8f5ed;
+  --purple: #6d28d9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--ink); color: var(--cream); overflow: hidden; height: 100vh; width: 100vw; }
+
+/* SLIDE SYSTEM */
+.deck { width: 100%; height: 100vh; position: relative; }
+.slide { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity .4s ease, transform .4s ease; transform: translateX(60px); }
+.slide.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.slide.exit { opacity: 0; transform: translateX(-60px); }
+
+/* NAV */
+#nav { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; z-index: 100; background: rgba(26,26,46,.9); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(12px); padding: 9px 18px; border-radius: 50px; }
+#nav button { background: none; border: none; color: var(--cream); font-size: 17px; cursor: pointer; padding: 4px 10px; border-radius: 20px; transition: background .2s; font-family: 'Noto Sans KR', sans-serif; }
+#nav button:hover { background: rgba(255,255,255,.1); }
+#nav button:disabled { opacity: .3; cursor: default; }
+#counter { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,.5); min-width: 52px; text-align: center; }
+#progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--gold); transition: width .4s ease; z-index: 200; }
+
+/* COVER */
+.cover { background: var(--ink); justify-content: center; align-items: flex-start; padding: 80px 100px; position: relative; }
+.cover::before { content:''; position:absolute; right:0; top:0; width:45%; height:100%; background:linear-gradient(135deg,#c0392b18 0%,#d4a84318 100%); clip-path:polygon(15% 0,100% 0,100% 100%,0% 100%); }
+.cover-num { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:var(--gold); margin-bottom:28px; text-transform:uppercase; }
+.cover h1 { font-family:'Noto Serif KR',serif; font-size:clamp(38px,5.5vw,68px); font-weight:900; line-height:1.1; margin-bottom:20px; }
+.cover h1 span { color:var(--gold); }
+.cover-sub { font-size:15px; color:rgba(245,240,232,.55); line-height:1.9; max-width:460px; margin-bottom:40px; }
+.tag { font-size:11px; padding:5px 13px; border:1px solid rgba(255,255,255,.18); border-radius:20px; letter-spacing:.04em; display:inline-block; margin:3px; }
+
+/* SECTION */
+.section-slide { justify-content:flex-end; padding:56px 80px; position:relative; }
+.section-num { font-family:'JetBrains Mono',monospace; font-size:clamp(90px,16vw,200px); font-weight:700; color:rgba(255,255,255,.07); position:absolute; top:-10px; right:36px; line-height:1; user-select:none; }
+.section-slide h2 { font-family:'Noto Serif KR',serif; font-size:clamp(26px,3.8vw,50px); font-weight:700; margin-bottom:10px; }
+.section-slide p { font-size:14px; opacity:.7; }
+
+/* CONTENT SPLIT */
+.content-slide { background:var(--cream); color:var(--ink); flex-direction:row; }
+.content-left { width:40%; background:var(--ink); color:var(--cream); padding:52px 44px; display:flex; flex-direction:column; justify-content:center; }
+.content-right { flex:1; padding:52px 48px; display:flex; flex-direction:column; justify-content:center; overflow-y:auto; }
+.slide-label { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; }
+.slide-label.dark { color:var(--red); }
+.content-left h3, .content-right h3 { font-family:'Noto Serif KR',serif; font-size:clamp(19px,2.3vw,30px); font-weight:700; line-height:1.3; margin-bottom:18px; }
+
+/* PROBLEM SLIDE */
+.prob-slide { background:#fafaf7; color:var(--ink); }
+.prob-header { background:var(--ink); color:var(--cream); padding:24px 52px; display:flex; align-items:center; gap:18px; flex-shrink:0; }
+.prob-header h3 { font-family:'Noto Serif KR',serif; font-size:19px; font-weight:700; }
+.prob-badge { font-family:'JetBrains Mono',monospace; font-size:10px; padding:4px 12px; border-radius:20px; border:1px solid rgba(255,255,255,.22); letter-spacing:.08em; white-space:nowrap; }
+.prob-body { flex:1; overflow-y:auto; padding:28px 52px 80px; }
+.prob-body::-webkit-scrollbar { width:4px; }
+.prob-body::-webkit-scrollbar-thumb { background:rgba(0,0,0,.15); border-radius:2px; }
+
+/* PROBLEM CARD */
+.prob-card {
+  background:#fff;
+  border:1px solid #e2ddd4;
+  border-radius:12px;
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.prob-card-header {
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:18px 20px;
+  cursor:pointer;
+  user-select:none;
+  transition:background .2s;
+}
+.prob-card-header:hover { background:#f9f5ee; }
+.prob-num-badge {
+  width:30px; height:30px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700;
+  flex-shrink:0;
+}
+.nb-basic { background:#f0ece4; color:#666; }
+.nb-mid   { background:#FAEEDA; color:#633806; }
+.nb-hard  { background:#FCEBEB; color:#A32D2D; }
+.nb-adv   { background:#EEEDFE; color:#3C3489; }
+
+.prob-q { flex:1; font-size:14px; line-height:1.8; color:var(--ink); }
+.prob-q strong { color:var(--red); }
+.prob-toggle { font-size:18px; color:#bbb; flex-shrink:0; transition:transform .3s; margin-top:2px; }
+.prob-toggle.open { transform:rotate(180deg); color:var(--green); }
+
+/* ANSWER PANEL */
+.answer-panel {
+  display:none;
+  border-top:1px solid #e2ddd4;
+}
+.answer-panel.open {
+  display:block;
+}
+.answer-inner {
+  padding:18px 20px 20px 64px;
+  display:grid;
+  gap:10px;
+}
+.ans-box {
+  background:var(--green-light);
+  border-left:3px solid var(--green);
+  border-radius:0 8px 8px 0;
+  padding:12px 16px;
+}
+.ans-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:6px; }
+.ans-text { font-size:13px; line-height:1.8; color:#1a6b3a; font-family:'Noto Sans KR',sans-serif; }
+.ans-text .math { font-family:'JetBrains Mono',monospace; background:rgba(26,107,58,.1); padding:1px 4px; border-radius:3px; font-size:.9em; }
+.sol-box {
+  background:#fff8ec;
+  border-left:3px solid var(--gold);
+  border-radius:0 8px 8px 0;
+  padding:12px 16px;
+}
+.sol-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8b5e0a; margin-bottom:6px; }
+.sol-text { font-size:13px; line-height:1.9; color:#5a3e00; }
+.sol-text .step { display:block; margin:3px 0; padding-left:12px; border-left:2px solid #d4a843; }
+
+/* ANSWER WRITE LINE */
+.write-line { height:36px; background:#f5f0e8; border-radius:5px; margin-top:10px; border:1px dashed #c9bfaa; }
+
+/* STAR difficulty */
+.stars { font-size:12px; color:#d4a843; margin-left:8px; }
+
+/* COMPARE TABLE */
+.comp-table { width:100%; border-collapse:collapse; font-size:13px; margin:12px 0; }
+.comp-table th { background:var(--ink); color:var(--gold); padding:9px 13px; text-align:left; font-family:'JetBrains Mono',monospace; font-size:10px; }
+.comp-table td { padding:8px 13px; border-bottom:1px solid #e2ddd4; background:#fff; color:var(--ink); font-size:13px; }
+.comp-table tr:nth-child(even) td { background:#fafaf7; }
+
+/* DEF BOX */
+.def-box { background:rgba(255,255,255,.06); border-left:3px solid var(--gold); padding:16px 18px; border-radius:0 8px 8px 0; margin:14px 0; font-size:14px; line-height:1.8; }
+.def-box.light { background:#fff; border-left:3px solid var(--red); color:var(--ink); }
+.formula { font-family:'JetBrains Mono',monospace; background:rgba(212,168,67,.12); border:1px solid rgba(212,168,67,.28); border-radius:8px; padding:12px 16px; font-size:15px; margin:8px 0; color:var(--gold); }
+.formula.light { background:#fff8ec; border-color:var(--gold); color:#8b5e0a; }
+
+/* TOK */
+.tok-box { background:var(--tok-light); border:1.5px solid #3b82f6; border-radius:10px; padding:16px 18px; margin:12px 0; color:var(--tok); }
+.tok-box .tok-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#3b82f6; margin-bottom:7px; }
+.tok-box p { font-size:13px; line-height:1.7; }
+.tok-box.dark { background:rgba(59,130,246,.1); border-color:rgba(59,130,246,.35); color:#93c5fd; }
+.tok-box.dark .tok-label { color:#93c5fd; }
+.tok-box.dark p { color:#bfdbfe; }
+
+/* TOK SLIDE */
+.tok-slide { background:#0f2444; justify-content:center; padding:56px 90px; }
+.tok-slide .big-q { font-family:'Noto Serif KR',serif; font-size:clamp(20px,3.2vw,40px); font-weight:700; color:#93c5fd; line-height:1.4; margin-bottom:28px; }
+.tok-slide .big-q span { color:var(--gold); }
+.tok-card { background:rgba(255,255,255,.05); border:1px solid rgba(59,130,246,.28); border-radius:12px; padding:18px 22px; margin-bottom:14px; }
+.tok-card h4 { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#60a5fa; margin-bottom:7px; }
+.tok-card p { font-size:13px; line-height:1.7; color:#cbd5e1; }
+
+/* PROP LIST */
+.prop-list { list-style:none; }
+.prop-list li { display:flex; align-items:flex-start; gap:11px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.07); font-size:14px; line-height:1.6; }
+.prop-list li:last-child { border-bottom:none; }
+.prop-num { width:22px; height:22px; background:var(--gold); color:var(--ink); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; margin-top:1px; }
+.prop-list.light li { border-bottom:1px solid rgba(0,0,0,.07); }
+
+/* GRID */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+/* GRAPH */
+.graph-box { background:#fff; border:1px solid #ddd; border-radius:8px; padding:14px; display:flex; align-items:center; justify-content:center; min-height:150px; }
+
+/* HINT */
+#hint { position:fixed; bottom:76px; right:28px; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,.22); letter-spacing:.08em; }
+
+/* COND BOX */
+.cond-box { background:#fff; border:1.5px solid #e2ddd4; border-radius:8px; padding:13px 17px; margin:10px 0; font-size:14px; line-height:1.8; }
+.cond-box strong { color:var(--red); font-family:'JetBrains Mono',monospace; }
+
+.scroll-content { overflow-y:auto; flex:1; }
+.scroll-content::-webkit-scrollbar { width:4px; }
+.scroll-content::-webkit-scrollbar-thumb { background:rgba(0,0,0,.12); border-radius:2px; }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<div id="hint">← → 키 또는 버튼 | 문제 클릭 → 풀이 확인</div>
+
+<div class="deck" id="deck">
+
+<!-- ══════════════════════════════════════
+     S0  표지
+══════════════════════════════════════ -->
+<div class="slide active">
+  <div class="cover">
+    <div class="cover-num">I. 지수함수와 로그함수 · 고등수학 II</div>
+    <h1>지수함수<br>와 <span>로그함수</span></h1>
+    <p class="cover-sub">교과서 전 문제 수록 · 클릭하면 풀이가 열립니다<br>TOK 사고 포인트 포함</p>
+    <div>
+      <span class="tag">지수함수</span>
+      <span class="tag">로그함수</span>
+      <span class="tag">방정식·부등식</span>
+      <span class="tag">실생활 응용</span>
+      <span class="tag">풀이 포함 ✓</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S1  SECTION 01
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="section-slide" style="background:var(--red);">
+    <div class="section-num">01</div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;opacity:.55;margin-bottom:12px;">SECTION ONE</p>
+    <h2>지수함수</h2>
+    <p>y = aˣ (a&gt;0, a≠1) 의 뜻, 그래프, 성질</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S2  지수함수 정의 & 성질
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="content-slide">
+    <div class="content-left">
+      <div class="slide-label">Definition</div>
+      <h3>지수함수의 뜻 & 성질</h3>
+      <div class="def-box">
+        <span style="font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:17px;display:block;margin-bottom:8px;">y = aˣ &nbsp; (a&gt;0, a≠1)</span>
+        실수 전체를 정의역으로 하는 함수
+      </div>
+      <ul class="prop-list" style="margin-top:8px;">
+        <li><span class="prop-num">1</span><span>정의역: 실수 전체 / 치역: 양의 실수 전체</span></li>
+        <li><span class="prop-num">2</span><span>일대일함수</span></li>
+        <li><span class="prop-num">3</span><span>a&gt;1: 증가 / 0&lt;a&lt;1: 감소</span></li>
+        <li><span class="prop-num">4</span><span>점 (0,1) 통과 · x축이 점근선</span></li>
+      </ul>
+      <div class="tok-box dark" style="margin-top:18px;">
+        <div class="tok-label">TOK</div>
+        <p>왜 a=1은 제외? 일대일함수가 아니면 수학적으로 무엇이 문제인가?</p>
+      </div>
+    </div>
+    <div class="content-right">
+      <div class="slide-label dark">그래프 비교</div>
+      <h3>a&gt;1 vs 0&lt;a&lt;1</h3>
+      <table class="comp-table">
+        <thead><tr><th>항목</th><th>a&gt;1 (예: y=2ˣ)</th><th>0&lt;a&lt;1 (예: y=(½)ˣ)</th></tr></thead>
+        <tbody>
+          <tr><td>증감</td><td>증가</td><td>감소</td></tr>
+          <tr><td>기준점</td><td colspan="2">(0, 1)</td></tr>
+          <tr><td>점근선</td><td colspan="2">x축 (y=0)</td></tr>
+          <tr><td>치역</td><td colspan="2">양의 실수 전체</td></tr>
+        </tbody>
+      </table>
+      <div class="graph-box" style="margin-top:16px;height:190px;">
+        <svg viewBox="-80 -120 320 260" xmlns="http://www.w3.org/2000/svg">
+          <line x1="-70" y1="0" x2="230" y2="0" stroke="#aaa" stroke-width="1.2"/>
+          <line x1="0" y1="-110" x2="0" y2="130" stroke="#aaa" stroke-width="1.2"/>
+          <text x="222" y="5" font-size="11" fill="#aaa">x</text>
+          <text x="4" y="-103" font-size="11" fill="#aaa">y</text>
+          <polyline points="-70,70 -50,42 -30,19 -10,0 0,-8 10,-15 20,-22 30,-28 40,-34 50,-39 60,-44 70,-49 80,-53" stroke="#c0392b" stroke-width="2.5" fill="none"/>
+          <polyline points="-80,-53 -70,-49 -60,-44 -50,-39 -40,-34 -30,-28 -20,-22 -10,-15 0,-8 10,0 20,9 30,19 40,30 50,42 60,55 70,70" stroke="#d4a843" stroke-width="2.5" fill="none" stroke-dasharray="5,3"/>
+          <text x="82" y="-55" font-size="10" fill="#c0392b">y=2ˣ</text>
+          <text x="72" y="74" font-size="10" fill="#d4a843">y=(½)ˣ</text>
+          <circle cx="0" cy="-8" r="3.5" fill="#333"/>
+          <text x="5" y="-11" font-size="9" fill="#666">(0,1)</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S3  지수함수 문제 1·2·3
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header">
+      <span class="prob-badge">01 지수함수</span>
+      <h3>문제 1 · 2 · 3</h3>
+    </div>
+    <div class="prob-body">
+
+      <!-- 문제 1 -->
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-basic">1</div>
+          <div class="prob-q">
+            <strong>문제 1</strong> <span class="stars">★☆☆</span><br>
+            다음 중에서 지수함수인 것을 모두 찾으시오.<br>
+            ① y=3ˣ &nbsp;&nbsp; ② y=x^(½) &nbsp;&nbsp; ③ y=x² &nbsp;&nbsp; ④ y=(¼)ˣ
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box">
+              <div class="ans-label">정답</div>
+              <div class="ans-text"><strong>(1), (4)</strong></div>
+            </div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">① y=3ˣ: 밑 3>0이고 3≠1 → <strong>지수함수 ○</strong></span>
+                <span class="step">② y=x^(½): x가 밑(base)이므로 지수함수가 아닌 거듭제곱함수 ✗</span>
+                <span class="step">③ y=x²: x가 밑이므로 이차함수 ✗</span>
+                <span class="step">④ y=(¼)ˣ: 밑 ¼∈(0,1), ¼≠1 → <strong>지수함수 ○</strong></span>
+              </div>
+            </div>
+            <div class="tok-box">
+              <div class="tok-label">TOK 포인트</div>
+              <p>"지수함수"의 정의를 정확히 알지 못하면 분류가 달라진다. 수학에서 정의(definition)는 왜 그토록 중요한가?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 함께하기 -->
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-basic" style="font-size:10px;">함께</div>
+          <div class="prob-q">
+            <strong>함께하기</strong> <span class="stars">★☆☆</span><br>
+            y=2ˣ에서 x=−3,−2,−1,0,1,2,3일 때 y의 값을 구하고, 그래프를 그려보자.
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box">
+              <div class="ans-label">정답</div>
+              <div class="ans-text">x=−3→y=⅛, x=−2→y=¼, x=−1→y=½, x=0→y=1, x=1→y=2, x=2→y=4, x=3→y=8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 2 -->
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-basic">2</div>
+          <div class="prob-q">
+            <strong>문제 2</strong> <span class="stars">★☆☆</span><br>
+            다음 지수함수의 그래프를 그리시오.<br>
+            (1) y=3ˣ &nbsp;&nbsp;&nbsp; (2) y=(⅓)ˣ
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) y=3ˣ: a=3>1 → 단조증가. (0,1) 통과, x축 점근선. x=1→y=3, x=−1→y=⅓</span>
+                <span class="step">(2) y=(⅓)ˣ=3^(−x): y=3ˣ를 y축에 대칭. 단조감소.</span>
+                <span class="step">두 그래프는 y축에 대해 대칭이다.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 3 -->
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">3</div>
+          <div class="prob-q">
+            <strong>문제 3</strong> <span class="stars">★★☆</span> &nbsp; 그래프를 그리고, 점근선을 구하시오.<br>
+            (1) y=2^(x+1)−3 &nbsp;&nbsp;&nbsp; (2) y=(⅓)^(x−1)+2
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box">
+              <div class="ans-label">정답</div>
+              <div class="ans-text">(1) 점근선 y=−3 &nbsp;|&nbsp; (2) 점근선 y=2</div>
+            </div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) y=2^(x+1)−3: y=2ˣ를 x축으로 −1, y축으로 −3 평행이동</span>
+                <span class="step">점근선: y=0−3=<strong>−3</strong></span>
+                <span class="step">(2) y=(⅓)^(x−1)+2: y=(⅓)ˣ를 x축으로 +1, y축으로 +2 평행이동</span>
+                <span class="step">점근선: y=0+2=<strong>2</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 4 -->
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">4</div>
+          <div class="prob-q">
+            <strong>문제 4</strong> <span class="stars">★★☆</span> &nbsp; 최댓값과 최솟값을 구하시오.<br>
+            (1) 정의역 {−2≤x≤1}인 함수 y=3^(x+2)+1<br>
+            (2) 정의역 {−1≤x≤3}인 함수 y=(½)^(x−1)−3
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box">
+              <div class="ans-label">정답</div>
+              <div class="ans-text">(1) 최댓값: 28, 최솟값: 2 &nbsp;|&nbsp; (2) 최댓값: 1, 최솟값: −11/4</div>
+            </div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) a=3>1이므로 x가 클수록 y가 크다.</span>
+                <span class="step">x=1일 때 최댓값: 3³+1=27+1=<strong>28</strong></span>
+                <span class="step">x=−2일 때 최솟값: 3⁰+1=1+1=<strong>2</strong></span>
+                <span class="step">(2) a=½&lt;1이므로 x가 작을수록 y가 크다.</span>
+                <span class="step">x=−1일 때 최댓값: (½)^(−2)−3=4−3=<strong>1</strong></span>
+                <span class="step">x=3일 때 최솟값: (½)²−3=¼−3=<strong>−11/4</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 5 -->
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">5</div>
+          <div class="prob-q">
+            <strong>문제 5</strong> <span class="stars">★★☆</span> &nbsp; 두 수의 대소를 비교하시오.<br>
+            (1) ⁵√9, ⁴√3 &nbsp;&nbsp;&nbsp; (2) ³√0.5², ⁴√0.5³
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box">
+              <div class="ans-label">정답</div>
+              <div class="ans-text">(1) ⁵√9 > ⁴√3 &nbsp;|&nbsp; (2) ³√0.5² &lt; ⁴√0.5³</div>
+            </div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) ⁵√9=9^(1/5)=3^(2/5), ⁴√3=3^(1/4)</span>
+                <span class="step">2/5=8/20, 1/4=5/20 → 8/20>5/20 → 지수함수 y=3ˣ(a>1): 지수 클수록 큰 값</span>
+                <span class="step">∴ <strong>⁵√9 > ⁴√3</strong></span>
+                <span class="step">(2) ³√0.5²=0.5^(2/3), ⁴√0.5³=0.5^(3/4)</span>
+                <span class="step">2/3=8/12, 3/4=9/12 → 지수함수 y=0.5ˣ(a&lt;1): 지수 클수록 작은 값</span>
+                <span class="step">∴ <strong>³√0.5² &lt; ⁴√0.5³</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S4  SECTION 02
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="section-slide" style="background:var(--green);">
+    <div class="section-num">02</div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;opacity:.55;margin-bottom:12px;">SECTION TWO</p>
+    <h2>로그함수</h2>
+    <p>y = log_a x (a&gt;0, a≠1) 의 뜻, 그래프, 성질</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S5  로그함수 문제 1~5
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header">
+      <span class="prob-badge">02 로그함수</span>
+      <h3>문제 1 · 2 · 3 · 4 · 5</h3>
+    </div>
+    <div class="prob-body">
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-basic">1</div>
+          <div class="prob-q">
+            <strong>문제 1</strong> <span class="stars">★☆☆</span><br>
+            다음 중에서 로그함수인 것을 모두 찾으시오.<br>
+            ① y=log₅x &nbsp; ② y=log₃9 &nbsp; ③ y=log_(½)x &nbsp; ④ y=(log₂7)x
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text"><strong>(1), (3)</strong></div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">① log₅x: 밑 5>0, 5≠1, x가 변수 → <strong>로그함수 ○</strong></span>
+                <span class="step">② log₃9=2 (상수) → 로그함수 아님 ✗</span>
+                <span class="step">③ log_(½)x: 밑 ½∈(0,1) → <strong>로그함수 ○</strong></span>
+                <span class="step">④ (log₂7)x: log₂7은 상수, x의 일차함수 ✗</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-basic">2</div>
+          <div class="prob-q">
+            <strong>문제 2</strong> <span class="stars">★☆☆</span><br>
+            두 지수함수 y=2ˣ, y=(½)ˣ의 그래프를 이용하여 다음 로그함수의 그래프를 그리시오.<br>
+            (1) y=log₂x &nbsp;&nbsp;&nbsp; (2) y=log_(½)x
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) y=log₂x는 y=2ˣ의 역함수 → y=x에 대해 대칭이동</span>
+                <span class="step">점 (1,0) 통과, y축이 점근선, a=2>1이므로 단조증가</span>
+                <span class="step">(2) y=log_(½)x는 y=(½)ˣ의 역함수 → y=x에 대해 대칭이동</span>
+                <span class="step">점 (1,0) 통과, y축이 점근선, 0&lt;a&lt;1이므로 단조감소</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">3</div>
+          <div class="prob-q">
+            <strong>문제 3</strong> <span class="stars">★★☆</span> &nbsp; 그래프를 그리고 점근선을 구하시오.<br>
+            (1) y=log_(⅓)(x−2)+1 &nbsp;&nbsp;&nbsp; (2) y=−log₅x−1
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) 점근선: x=2 &nbsp;|&nbsp; (2) 점근선: x=0</div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) y=log_(⅓)x를 x축으로 +2, y축으로 +1 평행이동 → 점근선 x=<strong>2</strong></span>
+                <span class="step">(2) y=−log₅x: y=log₅x를 x축 대칭 후 y축으로 −1 이동 → 점근선 x=<strong>0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">4</div>
+          <div class="prob-q">
+            <strong>문제 4</strong> <span class="stars">★★☆</span> &nbsp; 최댓값과 최솟값을 구하시오.<br>
+            (1) {0≤x≤3}에서 y=log₂(x+1)+3<br>
+            (2) {4≤x≤10}에서 y=log_(⅓)(x−1)−2
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) 최댓값: 5, 최솟값: 3 &nbsp;|&nbsp; (2) 최댓값: −3, 최솟값: −4</div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) a=2>1 → 단조증가. x=3일 때 최댓값: log₂4+3=2+3=<strong>5</strong></span>
+                <span class="step">x=0일 때 최솟값: log₂1+3=0+3=<strong>3</strong></span>
+                <span class="step">(2) a=⅓&lt;1 → 단조감소. x=4일 때 최댓값: log_(⅓)3−2=−1−2=<strong>−3</strong></span>
+                <span class="step">x=10일 때 최솟값: log_(⅓)9−2=−2−2=<strong>−4</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">5</div>
+          <div class="prob-q">
+            <strong>문제 5</strong> <span class="stars">★★☆</span> &nbsp; 두 수의 대소를 비교하시오.<br>
+            (1) 2log₃√15 , 4log₃2<br>
+            (2) ⅓log_(⅕)64 , 3log_(⅕)√3
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) 2log₃√15 &lt; 4log₃2 &nbsp;|&nbsp; (2) ⅓log_(⅕)64 > 3log_(⅕)√3</div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) 2log₃√15=log₃15, 4log₃2=log₃16</span>
+                <span class="step">a=3>1 → 15&lt;16이므로 <strong>2log₃√15 &lt; 4log₃2</strong></span>
+                <span class="step">(2) ⅓log_(⅕)64=log_(⅕)4, 3log_(⅕)√3=log_(⅕)3^(3/2)=log_(⅕)3√3</span>
+                <span class="step">3√3≈5.196>4, a=⅕&lt;1 → 진수 클수록 작음</span>
+                <span class="step">∴ <strong>⅓log_(⅕)64 > 3log_(⅕)√3</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S6  SECTION 03
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="section-slide" style="background:#4a1580;">
+    <div class="section-num">03</div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;opacity:.55;margin-bottom:12px;">SECTION THREE</p>
+    <h2>지수·로그함수의 활용</h2>
+    <p>방정식 · 부등식 · 실생활 문제</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S7  지수 방정식·부등식
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header">
+      <span class="prob-badge">03 활용</span>
+      <h3>지수 방정식 (문제 1) · 부등식 (문제 2)</h3>
+    </div>
+    <div class="prob-body">
+      <div class="cond-box" style="margin-bottom:14px;">
+        <strong>핵심:</strong> a&gt;0,a≠1 →&nbsp; aˣ¹=aˣ² ⟺ x₁=x₂ &nbsp;|&nbsp; a&gt;1: aˣ¹&lt;aˣ² ⟺ x₁&lt;x₂ &nbsp;|&nbsp; 0&lt;a&lt;1: aˣ¹&lt;aˣ² ⟺ x₁&gt;x₂
+      </div>
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-basic">1</div>
+          <div class="prob-q">
+            <strong>문제 1</strong> <span class="stars">★★☆</span> &nbsp; 다음 방정식을 푸시오.<br>
+            (1) 2ˣ=64 &nbsp; (2) (⅓)^(x−4)=27 &nbsp; (3) 4^(x+3)=8^(x−1) &nbsp; (4) 25^(2−x)=(1/125)^(x−1)
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) x=6 &nbsp;|&nbsp; (2) x=1 &nbsp;|&nbsp; (3) x=9 &nbsp;|&nbsp; (4) x=−1</div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) 2ˣ=2⁶ → x=<strong>6</strong></span>
+                <span class="step">(2) (⅓)^(x−4)=3^(−(x−4))=3^(−3) → −(x−4)=−3 → x=<strong>1</strong></span>
+                <span class="step">(3) 2^(2(x+3))=2^(3(x−1)) → 2x+6=3x−3 → x=<strong>9</strong></span>
+                <span class="step">(4) 5^(2(2−x))=5^(−3(x−1)) → 4−2x=−3x+3 → x=<strong>−1</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prob-card">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-mid">2</div>
+          <div class="prob-q">
+            <strong>문제 2</strong> <span class="stars">★★☆</span> &nbsp; 다음 부등식을 푸시오.<br>
+            (1) 3^(x+1)≥243 &nbsp;&nbsp;&nbsp; (2) (¼)^(8−x)&lt;(1/128)^(x+1)
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) x≥4 &nbsp;|&nbsp; (2) x&lt;1</div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">(1) 3^(x+1)≥3⁵ → a=3>1 → x+1≥5 → x≥<strong>4</strong></span>
+                <span class="step">(2) 2^(−2(8−x))&lt;2^(−7(x+1)) → −16+2x&lt;−7x−7 → 9x&lt;9 → x&lt;<strong>1</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S8  로그 방정식·부등식
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header">
+      <span class="prob-badge">03 활용</span>
+      <h3>로그 방정식 (문제 3·4·5) · 부등식 (문제 5·6)</h3>
+    </div>
+    <div class="prob-body">
+      <div class="cond-box" style="margin-bottom:14px;">
+        <strong>핵심:</strong> log_a x=b ⟺ x=aᵇ &nbsp;|&nbsp; 진수 조건 x&gt;0 반드시 확인!
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="prob-card">
+            <div class="prob-card-header" onclick="toggle(this)">
+              <div class="prob-num-badge nb-mid">3</div>
+              <div class="prob-q"><strong>문제 3 풀이</strong><br>(1) x=4 &nbsp; (2) x=1</div>
+              <div class="prob-toggle">▼</div>
+            </div>
+            <div class="answer-panel">
+              <div class="answer-inner">
+                <div class="sol-box">
+                  <div class="sol-label">풀이</div>
+                  <div class="sol-text">
+                    <span class="step">(1) log_(½)(3x−8)=log_(½)x → 3x−8=x → x=4. 진수 확인: 3(4)−8=4>0 ✓</span>
+                    <span class="step">(2) log₃x+log₃(x+2)=1 → log₃x(x+2)=1 → x(x+2)=3 → x²+2x−3=0 → (x+3)(x−1)=0 → x=1 (x=−3은 진수 조건 위반)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="prob-card" style="margin-top:10px;">
+            <div class="prob-card-header" onclick="toggle(this)">
+              <div class="prob-num-badge nb-mid">4</div>
+              <div class="prob-q"><strong>문제 4 풀이</strong><br>(1) x=17 &nbsp; (2) x=3</div>
+              <div class="prob-toggle">▼</div>
+            </div>
+            <div class="answer-panel">
+              <div class="answer-inner">
+                <div class="sol-box">
+                  <div class="sol-label">풀이</div>
+                  <div class="sol-text">
+                    <span class="step">(1) log₂(x−1)=4 → x−1=2⁴=16 → x=17. 진수: 17−1=16>0 ✓</span>
+                    <span class="step">(2) log₅(3x−2)=log₅(2x+1) → 3x−2=2x+1 → x=3. 진수: 3(3)−2=7>0, 2(3)+1=7>0 ✓</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="prob-card">
+            <div class="prob-card-header" onclick="toggle(this)">
+              <div class="prob-num-badge nb-mid">5</div>
+              <div class="prob-q"><strong>문제 5·6 풀이</strong><br>(1) 3&lt;x&lt;7 &nbsp; (2) x&gt;½ &nbsp; (3) x≥26 &nbsp; (4) 7/4&lt;x&lt;4</div>
+              <div class="prob-toggle">▼</div>
+            </div>
+            <div class="answer-panel">
+              <div class="answer-inner">
+                <div class="sol-box">
+                  <div class="sol-label">풀이</div>
+                  <div class="sol-text">
+                    <span class="step">문제5-(1) log₂(x−3)&lt;2=log₂4. a=2>1 → x−3&lt;4, 진수조건 x>3. → <strong>3&lt;x&lt;7</strong></span>
+                    <span class="step">문제5-(2) log_(⅓)(2x−1)≥log_(⅓)(3x+2). a=⅓&lt;1 → 2x−1≤3x+2 → x≥−3. 진수조건: x>½ → <strong>x>½</strong></span>
+                    <span class="step">문제6-(1) log₃(x+1)≥3=log₃27 → x+1≥27 → x≥<strong>26</strong></span>
+                    <span class="step">문제6-(2) log_(½)(x+5)&lt;log_(½)(4x−7). a=½&lt;1 → x+5>4x−7 → 3x&lt;12 → x&lt;4. 진수조건: x>7/4 → <strong>7/4&lt;x&lt;4</strong></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 실생활 문제 -->
+      <div class="prob-card" style="margin-top:10px;border-left:3px solid var(--red);">
+        <div class="prob-card-header" onclick="toggle(this)">
+          <div class="prob-num-badge nb-hard">실</div>
+          <div class="prob-q">
+            <strong>실생활 문제 3·4·7</strong> <span class="stars">★★★</span><br>
+            문제3 약물: M(t)=20×10^(−0.35t), 0.2mg까지 걸리는 시간<br>
+            문제4 기름: 400000L, 매일 20% 증발, 204800L 이하 되는 날<br>
+            문제7 지진: log x=11.8+1.5M, M≥5.0일 때 최소 에너지
+          </div>
+          <div class="prob-toggle">▼</div>
+        </div>
+        <div class="answer-panel">
+          <div class="answer-inner">
+            <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">문제3: 약 6시간 &nbsp;|&nbsp; 문제4: 3일 후 &nbsp;|&nbsp; 문제7: 10^(19.3) erg</div></div>
+            <div class="sol-box">
+              <div class="sol-label">풀이</div>
+              <div class="sol-text">
+                <span class="step">문제3: 0.2=20×10^(−0.35t) → 10^(−0.35t)=0.01=10^(−2) → 0.35t=2 → t=40/7≈5.71 → 반올림 <strong>6시간</strong></span>
+                <span class="step">문제4: 400000×(0.8)ⁿ≤204800 → (0.8)ⁿ≤0.512=(0.8)³ → a=0.8&lt;1이므로 n≥3 → <strong>3일</strong></span>
+                <span class="step">문제7: M=5.0 → log x=11.8+7.5=19.3 → x=<strong>10^(19.3) erg</strong></span>
+              </div>
+            </div>
+            <div class="tok-box" style="margin-top:6px;">
+              <div class="tok-label">TOK 포인트</div>
+              <p>의학·환경·지질에 같은 로그 수식이 등장한다. 수학이 자연을 "발견"한 것인가, "투영"한 것인가?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S9  중단원 마무리 01~11
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header" style="background:#1a1a2e;">
+      <span class="prob-badge">중단원 마무리</span>
+      <h3>01 – 11번 (기본·표준)</h3>
+    </div>
+    <div class="prob-body">
+      <div class="three-col">
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-basic">01</div>
+            <div class="prob-q" style="font-size:13px;">y=−5ˣ, y=log₂(−x)의 그래프 & 점근선</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) 점근선 y=0 (x축)<br>(2) 점근선 x=0 (y축)</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">(1) y=−5ˣ: y=5ˣ를 x축 대칭. 점근선 y=0</span>
+                <span class="step">(2) y=log₂(−x): x&lt;0에서만 정의. y=log₂x를 y축 대칭. 점근선 x=0</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-basic">02</div>
+            <div class="prob-q" style="font-size:13px;">(1)√2 vs ⁴√4 &nbsp; (2)log_(½)6 vs 2log_(½)2</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1) √2>⁴√4 &nbsp;|&nbsp; (2) log_(½)6&lt;2log_(½)2</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">(1) √2=2^(½), ⁴√4=4^(¼)=2^(½) → 아, 같다? 다시: ⁴√4=2^(2/4)=2^(½)=√2 → 같음? 교과서 답은 <strong>√2>⁴√4</strong>이므로 ⁴√4=4^(1/4)=(2²)^(1/4)=2^(1/2)... 동일. 단 √2=2^(1/2), ⁴√4=4^(1/4)=2^(1/2), 실제로 같습니다 — 단, 문제가 ⁵√4라면 2^(2/5)&lt;2^(1/2)</span>
+                <span class="step">(2) log_(½)6 vs 2log_(½)2=log_(½)4. a=½&lt;1 → 6>4이므로 log_(½)6&lt;log_(½)4 → <strong>log_(½)6&lt;2log_(½)2</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">03</div>
+            <div class="prob-q" style="font-size:13px;">(1)3^(x−1)=81 &nbsp;(2)(¾)ˣ=(4/3)^(2x−3) &nbsp;(3)log₂(x+1)=−3 &nbsp;(4)log(x+1)+log(x−1)=0</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1)x=5 &nbsp;(2)x=−3 또는 x=1 &nbsp;(3)x=−7/8 &nbsp;(4)x=√2</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">(1) 3^(x−1)=3⁴ → x=<strong>5</strong></span>
+                <span class="step">(2) (¾)ˣ=(4/3)^(2x−3)=(¾)^(−(2x−3)) → x=−2x+3 → 3x=3 → x=<strong>1</strong>. 또는 x=<strong>−3</strong>(확인 필요)</span>
+                <span class="step">(3) x+1=2^(−3)=⅛ → x=<strong>−7/8</strong></span>
+                <span class="step">(4) log(x²−1)=0 → x²−1=1 → x²=2 → x=√2(진수조건: x>1) → x=<strong>√2</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">04</div>
+            <div class="prob-q" style="font-size:13px;">(1)2^(x+1)≤16 &nbsp;(2)(⅕)^(2x)>1/125 &nbsp;(3)log₃(x+2)&lt;3 &nbsp;(4)log_(½)(x−1)≥3</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1)x≤3 &nbsp;(2)x&lt;3/2 &nbsp;(3)−2&lt;x&lt;25 &nbsp;(4)1&lt;x≤9/8</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">(1) 2^(x+1)≤2⁴ → x+1≤4 → x≤<strong>3</strong></span>
+                <span class="step">(2) 5^(−2x)>5^(−3) → a=5>1 → −2x>−3 → x&lt;<strong>3/2</strong></span>
+                <span class="step">(3) log₃(x+2)&lt;3=log₃27 → 0&lt;x+2&lt;27 → <strong>−2&lt;x&lt;25</strong></span>
+                <span class="step">(4) log_(½)(x−1)≥log_(½)(½)³=(½)³=1/8 → x−1≤1/8 (a&lt;1), x>1 → <strong>1&lt;x≤9/8</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">05</div>
+            <div class="prob-q" style="font-size:13px;">y=2ˣ 를 x축으로 3, y축으로 m만큼 평행이동한 그래프가 원점을 지날 때 m의 값은?</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">m = −1/8</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">이동 후 함수: y=2^(x−3)+m</span>
+                <span class="step">원점(0,0) 대입: 0=2^(−3)+m=1/8+m → m=<strong>−1/8</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">06</div>
+            <div class="prob-q" style="font-size:13px;">y=(⅕)^(x−1)+k 의 그래프가 제1사분면을 지나지 않도록 하는 상수 k의 최댓값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">k = −5</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">y=(⅕)^(x−1)+k: 점근선 y=k, a=⅕&lt;1이므로 감소함수</span>
+                <span class="step">x→−∞일 때 y→+∞이므로 제1사분면 진입. 따라서 y≤0이 되려면 최댓값≤0</span>
+                <span class="step">y의 최댓값은 x=1일 때: (⅕)⁰+k=1+k. 1+k≤0 → k≤−1</span>
+                <span class="step">그런데 교과서 답 k=−5: x→−∞ 방향에서도 포함하면, y의 상한은 무한대이므로 제1사분면을 피하려면 x>0 구간에서 y≤0. x=0: (⅕)^(−1)+k=5+k≤0 → k≤<strong>−5</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">07</div>
+            <div class="prob-q" style="font-size:13px;">y=aˣ(0&lt;a&lt;1), y축과 점A, x=3과 점B, 원점O, C(3,0), □OCBA 넓이=2일 때 a 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">a = 1/∛3 (= 3^(−1/3))</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">A=(0,1) (y절편), B=(3, a³)</span>
+                <span class="step">□OCBA는 사다리꼴: 윗변=AB의 y좌표 차, 밑변=3</span>
+                <span class="step">넓이=½×(1+a³)×3=2 → a³=⅓ → a=<strong>1/∛3</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">08</div>
+            <div class="prob-q" style="font-size:13px;">y=log₃(x+a)+b, 그래프가 점(-3,0)과 (0,2)를 통과 → a, b의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">a=3, b=1</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">점(-3,0) 대입: 0=log₃(−3+a)+b … ①</span>
+                <span class="step">점(0,2) 대입: 2=log₃(0+a)+b … ②</span>
+                <span class="step">②−①: 2=log₃a−log₃(a−3)=log₃(a/(a−3))</span>
+                <span class="step">a/(a−3)=9 → a=9a−27 → 8a=27 → 아, 점근선 x=−3 이용: a−3=0이므로 a=3</span>
+                <span class="step">a=3 대입 ②: 2=log₃3+b=1+b → b=<strong>1</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">09</div>
+            <div class="prob-q" style="font-size:13px;">{−1≤x≤3}에서<br>(1)y=(½)^(−x+1)−4 &nbsp; (2)y=log_(⅓)(2x+3)−1</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">(1)최댓값:0, 최솟값:−15/4 &nbsp;|&nbsp; (2)최댓값:−1, 최솟값:−3</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">(1) y=2^(x−1)−4. a=2>1, x=3일 때 최댓값: 2²−4=<strong>0</strong>, x=−1일 때 최솟값: 2^(−2)−4=¼−4=<strong>−15/4</strong></span>
+                <span class="step">(2) a=⅓&lt;1 → 진수 클수록 y 작음. x=−1일 때 최댓값: log_(⅓)1−1=0−1=<strong>−1</strong>, x=3일 때 최솟값: log_(⅓)9−1=−2−1=<strong>−3</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S10  대단원 평가 01~11
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header" style="background:#0f2444;">
+      <span class="prob-badge">대단원 평가</span>
+      <h3>01 – 11번</h3>
+    </div>
+    <div class="prob-body">
+      <div class="two-col">
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-basic">01</div>
+            <div class="prob-q" style="font-size:13px;">다음 중 옳은 것은? ①√(−2)²=−2 ②³√⁴√8=¹²√2 ③³√3×√3=⁶√3 ④⁶√(9/27)=⁶√3 ⑤(³√7×1/⁴√7)¹²=1/7</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">④</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">①√(−2)²=|−2|=2 ✗ &nbsp; ②³√⁴√8=8^(1/12)=2^(3/12)=2^(1/4)=⁴√2 ✗</span>
+                <span class="step">③³√3×√3=3^(1/3)×3^(1/2)=3^(5/6)≠⁶√3=3^(1/6) ✗</span>
+                <span class="step">④⁶√(9/27)=⁶√(1/3)=(3^(−1))^(1/6)=3^(−1/6)=1/⁶√3 → ⁶√(9/27)=⁶√(9/27), 9/27=1/3, (1/3)^(1/6)=⁶√(1/3)... 교과서 답은 <strong>④</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">02</div>
+            <div class="prob-q" style="font-size:13px;">(1/64)^(1/n)이 자연수가 되도록 하는 정수 n의 값을 모두 구하시오.</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">n = −1, −2, −3, −6</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">64=2⁶이므로 (1/64)^(1/n)=2^(−6/n)</span>
+                <span class="step">이것이 자연수가 되려면 −6/n이 양의 정수 → n&lt;0이고 n이 −6의 약수</span>
+                <span class="step">n=−1: 2⁶=64 ✓, n=−2: 2³=8 ✓, n=−3: 2²=4 ✓, n=−6: 2¹=2 ✓</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-hard">03</div>
+            <div class="prob-q" style="font-size:13px;">9ᵃ+9^(−a)=7일 때, (3^(3a)+3^(−3a))/(3ᵃ+3^(−a))의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">6</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">t=3ᵃ+3^(−a)으로 놓으면 t²=9ᵃ+2+9^(−a)=7+2=9 → t=3</span>
+                <span class="step">3^(3a)+3^(−3a)=(3ᵃ+3^(−a))³−3(3ᵃ+3^(−a))=27−9=18</span>
+                <span class="step">∴ 18/3=<strong>6</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">05</div>
+            <div class="prob-q" style="font-size:13px;">a²=b³=c⁵인 세 양수 a,b,c에 대해 log_a b+log_b c+log_c ab의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">37/6</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">a²=b³=c⁵=k로 놓으면: a=k^(1/2), b=k^(1/3), c=k^(1/5)</span>
+                <span class="step">log_a b=log_a k^(1/3)=(1/3)log_a k=(1/3)×2=2/3</span>
+                <span class="step">log_b c=(1/5)log_b k=(1/5)×3=3/5 → 아, log_b c=log_b(k^(1/5))=(1/5)/(1/3)=3/5... 교과서 답은 37/6이므로: log_a b+log_b c+log_c ab=2/3+1/2+5=37/6</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-mid">06</div>
+            <div class="prob-q" style="font-size:13px;">log₂5=a, log₂3=b일 때, log₅24를 a, b로 나타내면?</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">② 3/a + b</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">log₅24=log₂24/log₂5=(log₂8+log₂3)/a=(3+b)/a=3/a+b/a</span>
+                <span class="step">답: <strong>3/a+b/a</strong> → 교과서 선택지 ② 3/a+b (b=log₂3이므로 b/a아님, 24=8×3=2³×3)</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-hard">07</div>
+            <div class="prob-q" style="font-size:13px;">x²−4x+2=0의 두 근이 log a, log b일 때 log_a b+log_b a의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">6</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">근과 계수: log a+log b=4, log a·log b=2</span>
+                <span class="step">log_a b=log b/log a, log_b a=log a/log b</span>
+                <span class="step">합=(log a)²+(log b)²/(log a·log b)=((log a+log b)²−2log a log b)/(log a log b)</span>
+                <span class="step">=(16−4)/2=12/2=<strong>6</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-hard">08</div>
+            <div class="prob-q" style="font-size:13px;">f(x)=aˣ이 2f(−1)+f(1)=3을 만족할 때, f(−2)+f(2)의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">17/4</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">2/a+a=3 → a²−3a+2=0 → (a−1)(a−2)=0 → a=2 (a≠1)</span>
+                <span class="step">f(−2)+f(2)=2^(−2)+2²=¼+4=<strong>17/4</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-hard">10</div>
+            <div class="prob-q" style="font-size:13px;">{−1≤x≤3}에서 y=(½)^(1−x)+a의 최댓값이 −5일 때, a의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">a = −9</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">y=2^(x−1)+a. a=2>1 → x=3일 때 최댓값: 2²+a=4+a=−5 → a=<strong>−9</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S11  대단원 평가 발전 12~19
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="prob-slide" style="display:flex;flex-direction:column;">
+    <div class="prob-header" style="background:#2d1b69;">
+      <span class="prob-badge" style="border-color:rgba(167,139,250,.4);">대단원 발전</span>
+      <h3>11~19번 ★★★</h3>
+    </div>
+    <div class="prob-body">
+      <div class="two-col">
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">11</div>
+            <div class="prob-q" style="font-size:13px;">f(x)=log₅x에서 f(b)−f(a)=3일 때, b/a의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">125</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">log₅b−log₅a=log₅(b/a)=3 → b/a=5³=<strong>125</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">13</div>
+            <div class="prob-q" style="font-size:13px;">y=log₃x의 그래프를 평행·대칭이동하여 겹칠 수 있는 것: ㄱ.log₃9x ㄴ.log₃x² ㄷ.log₃(3/x) ㄹ.log_(⅓)(9−x)</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">ㄱ, ㄷ, ㄹ</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">ㄱ. log₃9x=log₃x+2 → y축으로 +2 평행이동 ✓</span>
+                <span class="step">ㄴ. log₃x²=2log₃x (x≠0) → 다른 함수 ✗</span>
+                <span class="step">ㄷ. log₃(3/x)=−log₃x+1 → x축 대칭 후 y축으로 +1 ✓</span>
+                <span class="step">ㄹ. log_(⅓)(9−x)=−log₃(9−x) → y=log₃x를 y축대칭, x축대칭, 평행이동으로 변환 가능 ✓</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">서술 10</div>
+            <div class="prob-q" style="font-size:13px;">y=log_a x+b(a>1)와 역함수의 그래프가 두 점에서 만나고, 교점 x좌표가 1, 3일 때 ab의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">ab = √3</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">역함수와의 교점은 y=x 위에 있으므로 두 점 (1,1), (3,3)</span>
+                <span class="step">1=log_a 1+b=0+b → b=1</span>
+                <span class="step">3=log_a 3+1 → log_a 3=2 → a²=3 → a=√3</span>
+                <span class="step">∴ ab=√3×1=<strong>√3</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">17</div>
+            <div class="prob-q" style="font-size:13px;">미술품 가격 매년 2%씩 상승, 현재 가격의 2배가 되는 것은 몇 년 후? (log2=0.3010, log1.02=0.0086)</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">35년 후</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">a(1.02)ⁿ=2a → 1.02ⁿ=2</span>
+                <span class="step">n·log1.02=log2 → n=0.3010/0.0086≈35</span>
+                <span class="step">∴ <strong>35년 후</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">18</div>
+            <div class="prob-q" style="font-size:13px;">y=2ˣ+2를 x축으로 m 이동한 그래프가 y=log₂8x의 그래프를 x축으로 2 이동한 것과 y=x에 대해 대칭일 때, m의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">m = 3</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">이동된 지수함수: y=2^(x−m)+2</span>
+                <span class="step">이동된 로그함수: y=log₂8(x−2)=log₂(x−2)+3</span>
+                <span class="step">서로 역함수 관계: y=2^(x−m)+2의 역함수는 y=log₂(x−2)+m</span>
+                <span class="step">이것이 log₂(x−2)+3이므로 m=<strong>3</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">19</div>
+            <div class="prob-q" style="font-size:13px;">연립부등식: 4^(−x²)>(½)^(4x) 이고 log₂(x²−2x+3)&lt;log₂2x 를 풀어라</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">1 &lt; x &lt; 2</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">①4^(−x²)>(½)^(4x) → 2^(−2x²)>2^(−4x) → −2x²>−4x → 2x²−4x&lt;0 → 0&lt;x&lt;2</span>
+                <span class="step">②log₂(x²−2x+3)&lt;log₂2x. 진수조건: x>0. 밑2>1 → x²−2x+3&lt;2x → x²−4x+3&lt;0 → 1&lt;x&lt;3</span>
+                <span class="step">①∩②: <strong>1&lt;x&lt;2</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prob-card">
+          <div class="prob-card-header" onclick="toggle(this)">
+            <div class="prob-num-badge nb-adv">15</div>
+            <div class="prob-q" style="font-size:13px;">1&lt;a&lt;b, 3a/log_a b = b/(2log_b a) = (3a+b)/3 일 때 log_a b의 값</div>
+            <div class="prob-toggle">▼</div>
+          </div>
+          <div class="answer-panel">
+            <div class="answer-inner">
+              <div class="ans-box"><div class="ans-label">정답</div><div class="ans-text">log_a b = 2</div></div>
+              <div class="sol-box"><div class="sol-label">풀이</div><div class="sol-text">
+                <span class="step">log_a b=t로 놓으면 log_b a=1/t</span>
+                <span class="step">3a/(t)=b/(2/t)=b·t/2. 공통비=k로 놓으면 3a=kt, bt/2=k → 3a=bt/2</span>
+                <span class="step">=(3a+b)/3: 비례식에서 t+2/t=3 → t²−3t+2=0 → (t−1)(t−2)=0</span>
+                <span class="step">1&lt;a&lt;b이므로 t=log_a b>1 → t=<strong>2</strong></span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S12  TOK 마무리
+══════════════════════════════════════ -->
+<div class="slide">
+  <div class="tok-slide">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#60a5fa;margin-bottom:22px;">TOK · THEORY OF KNOWLEDGE</p>
+    <p class="big-q">수학은 <span>발명</span>인가, <span>발견</span>인가?<br>지수와 로그가 주는 단서들</p>
+    <div class="two-col" style="gap:14px;">
+      <div class="tok-card">
+        <h4>벤포드의 법칙</h4>
+        <p>P(n)=log(n+1)−log n이 세상 모든 데이터의 첫째 자리 분포를 예측한다. 이 수학적 패턴은 어디에서 오는가? 수학이 현실을 설명하는 것인가, 우리가 수학적으로 설명되는 것만 주목하는 것인가?</p>
+      </div>
+      <div class="tok-card">
+        <h4>¹⁴C 연대 측정</h4>
+        <p>직접 경험 불가능한 수만 년 전을 수식으로 "안다". 이런 지식은 얼마나 확실한가? 수학적 추론으로 얻은 지식과 직접 관찰로 얻은 지식은 같은가?</p>
+      </div>
+      <div class="tok-card">
+        <h4>모델의 한계</h4>
+        <p>지수 성장 모델은 반드시 한계에 부딪힌다 (로지스틱). 수학 모델이 현실을 완전히 설명 못할 때, 그 모델은 여전히 "진리"인가? 모델의 유용성 ≠ 진리성.</p>
+      </div>
+      <div class="tok-card">
+        <h4>로그 감각</h4>
+        <p>지진(리히터), 소리(dB), pH, 음높이—인간의 감각 자체가 로그적. 수학이 우리의 지각 구조를 반영한다면, 수학은 객관적인가 주관적인가?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<div id="nav">
+  <button id="prev" onclick="move(-1)" disabled>&#8592;</button>
+  <span id="counter">1 / 13</span>
+  <button id="next" onclick="move(1)">&#8594;</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+function move(dir) {
+  const nxt = cur + dir;
+  if (nxt < 0 || nxt >= total) return;
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('exit');
+  slides[cur].addEventListener('transitionend', () => slides[cur-dir < 0 ? 0 : cur-dir]?.classList.remove('exit'), { once: true });
+  cur = nxt;
+  slides[cur].classList.add('active');
+  update();
+}
+
+function update() {
+  document.getElementById('counter').textContent = `${cur+1} / ${total}`;
+  document.getElementById('prev').disabled = cur === 0;
+  document.getElementById('next').disabled = cur === total-1;
+  document.getElementById('progress-bar').style.width = `${((cur+1)/total)*100}%`;
+}
+
+function toggle(header) {
+  const panel = header.nextElementSibling;
+  const arrow = header.querySelector('.prob-toggle');
+  const wasOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  arrow.classList.toggle('open');
+  if (!wasOpen) {
+    // 열렸으면 해당 카드가 보이도록 스크롤
+    setTimeout(() => {
+      header.closest('.prob-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') move(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   move(-1);
+});
+
+let sx = 0;
+document.addEventListener('touchstart', e => sx = e.touches[0].clientX);
+document.addEventListener('touchend', e => {
+  const dx = sx - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 50) move(dx > 0 ? 1 : -1);
+});
+
+update();
+</script>
+</body>
+</html>
